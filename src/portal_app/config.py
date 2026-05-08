@@ -37,11 +37,23 @@ class PortalConfig:
     apps: tuple[AppTile, ...] = field(default_factory=tuple)
 
 
-DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[2] / "apps.yaml"
+def _default_config_path() -> Path:
+    cwd_path = Path.cwd() / "apps.yaml"
+    if cwd_path.is_file():
+        return cwd_path
+    # Fallback for source-tree dev: parents[2] of src/portal_app/config.py
+    # is the project root. This breaks once the package is installed into
+    # site-packages, so we only use it as a last resort.
+    return Path(__file__).resolve().parents[2] / "apps.yaml"
 
 
 def load_config(path: Path | None = None) -> PortalConfig:
-    config_path = Path(path or os.environ.get("PORTAL_CONFIG", DEFAULT_CONFIG_PATH))
+    if path is not None:
+        config_path = Path(path)
+    elif env := os.environ.get("PORTAL_CONFIG"):
+        config_path = Path(env)
+    else:
+        config_path = _default_config_path()
     with config_path.open("r", encoding="utf-8") as fh:
         raw = yaml.safe_load(fh) or {}
 
