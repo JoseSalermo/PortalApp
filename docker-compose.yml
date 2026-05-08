@@ -1,0 +1,32 @@
+services:
+  portal-app:
+    build: .
+    image: portal-app:local
+    container_name: portal-app
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    environment:
+      # Hostname/IP that browser tile links should point to.
+      # Override per-host without editing apps.yaml.
+      PORTAL_EXTERNAL_HOST: ${PORTAL_EXTERNAL_HOST:-http://qnap.local}
+    volumes:
+      # Read-only access to the host docker socket for container discovery.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    # GID of the host's `docker` group so the non-root user inside the
+    # container can read the socket. Find it on the QNAP with:
+    #   stat -c '%g' /var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID:-999}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8888/healthz', timeout=5).read()"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    networks:
+      - homelab
+
+networks:
+  homelab:
+    external: true
+    name: ${HOMELAB_DOCKER_NETWORK:-homelab}

@@ -1,0 +1,47 @@
+# Source of truth for portal tiles.
+#
+# external_host is the hostname/IP the user's browser uses to reach the QNAP.
+# Override with the PORTAL_EXTERNAL_HOST env var without editing this file.
+external_host: http://qnap.local
+
+# Health-check timeout per app (seconds). HTTP probes run from inside the
+# portal container, so internal_url must be reachable on the docker network.
+health_timeout_seconds: 3
+
+# How long to cache health results before re-probing.
+health_cache_seconds: 15
+
+apps:
+  - name: Financial Market Report
+    description: Daily stock market reports and emails
+    icon: financial-market-report.svg
+    container: financial-market-report
+    external_port: 8082
+    internal_url: http://financial-market-report:8080
+    health_path: /
+
+  - name: Financial Market Levels
+    description: Intraday levels for tracked tickers
+    icon: financial-market-levels.svg
+    container: financial-market-levels
+    external_port: 8083
+    internal_url: http://financial-market-levels:8083
+    health_path: /
+
+  - name: Homelab Vault
+    description: HashiCorp Vault — secrets for homelab apps
+    icon: homelab-vault.svg
+    container: homelab-vault
+    external_port: 8201
+    internal_url: http://vault:8200
+    health_path: /v1/sys/health
+    # Vault returns non-200 for standby/sealed/etc. Treat these as "up".
+    healthy_status_codes: [200, 429, 472, 473, 501, 503]
+
+  - name: Salary Prediction API
+    description: FastAPI service predicting salaries
+    icon: salary-prediction-api.svg
+    container: salary-prediction-api
+    external_port: 8000
+    internal_url: http://salary-prediction-api:8000
+    health_path: /docs

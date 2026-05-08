@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "portal-app"
+version = "0.1.0"
+description = "Homelab portal: tiles for QNAP-hosted services with live status"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "Flask>=3.1",
+    "PyYAML>=6.0",
+    "requests>=2.32",
+    "docker>=7.1",
+]
+
+[project.scripts]
+portal-app = "portal_app.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+portal_app = ["web/templates/*.html", "web/static/*.css", "web/static/icons/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

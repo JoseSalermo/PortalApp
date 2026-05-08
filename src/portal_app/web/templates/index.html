@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header class="portal-header">
+  <h1>Homelab</h1>
+  <p class="subtitle">Apps running on <code>{{ host }}</code></p>
+</header>
+
+<section class="tile-grid">
+  {% for tile in tiles %}
+  <a class="tile tile--{{ tile.status }}"
+     href="{{ tile.url }}"
+     target="_blank"
+     rel="noopener"
+     title="{{ tile.error or tile.container_status }}">
+    <div class="tile-icon">
+      {% if tile.app.icon %}
+        <img src="{{ url_for('static', filename='icons/' ~ tile.app.icon) }}" alt="">
+      {% else %}
+        <span class="tile-icon-placeholder">{{ tile.app.name[:1] }}</span>
+      {% endif %}
+    </div>
+    <div class="tile-body">
+      <h2>{{ tile.app.name }}</h2>
+      <p>{{ tile.app.description }}</p>
+      <div class="tile-meta">
+        <span class="status-dot status-dot--{{ tile.status }}"></span>
+        <span class="status-label">{{ tile.status }}</span>
+        {% if tile.latency_ms is not none %}
+          <span class="latency">{{ tile.latency_ms }} ms</span>
+        {% endif %}
+        <span class="port">:{{ tile.app.external_port }}</span>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</section>
+
+<footer class="portal-footer">
+  <span>Status refreshes when you reload.</span>
+  <a href="/api/status">JSON</a>
+</footer>
+{% endblock %}
